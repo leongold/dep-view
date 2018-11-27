@@ -51,6 +51,15 @@ def _fetch_live_deps(key):
 
 
 def _fetch_deps(pkg, version, result):
+    """Recursively fetch and iterate over the dependencies of a
+    given package (of a given version).
+
+    In order accelrate performance, there are 2 mechanisms taking place:
+
+    1) dependencies are stored locally and are fetched when need be, and
+    2) when dependencies are not stored locally, HTTP requests are executed
+       in parallel.
+    """
     stored_deps = _fetch_stored_deps(pkg, version)
     if stored_deps is not None:
         deps = stored_deps
@@ -75,6 +84,7 @@ def _fetch_deps(pkg, version, result):
 
     all_deps_subdeps = {**missing_deps_subdeps, **cached_deps_subdeps}
     for (pkg_, version_), subdeps in all_deps_subdeps.items():
+        # recursion step
         version_ = _clean_version(version_)
         sub_sub_deps = {}
         result[(pkg_, version_)] = sub_sub_deps
