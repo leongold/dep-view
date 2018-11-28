@@ -1,10 +1,7 @@
-
+import requests
 import concurrent.futures
 import json
 
-from aiohttp import web
-app = web.Application()
-import requests
 
 cache = {}
 NPM_REGISTRY_FMT = 'https://registry.npmjs.org/{pkg}/{version}'
@@ -29,8 +26,7 @@ def _fetch_live_metadata(pkg, version):
     )
     try:
         response.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        app.logger.error(str(e))
+    except requests.exceptions.HTTPError:
         return {}
     return response.json()
 
@@ -79,16 +75,8 @@ def _fetch_deps(pkg, version, result):
         _fetch_deps(pkg_, version_, sub_subdeps)
 
 
-def main(request):
-    pkg = request.match_info.get('pkg')
-    version = _clean_version(request.match_info.get('version'))
-
+def fetch_deps(pkg, version):
     sub_deps = {}
     result = {_to_json_key(pkg, version): sub_deps}
     _fetch_deps(pkg, version, sub_deps)
-    return web.json_response(result)
-
-
-if __name__ == '__main__':
-    app.add_routes([web.get('/{pkg}/{version}', main)])
-    web.run_app(app)
+    return result
