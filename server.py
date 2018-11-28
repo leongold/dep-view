@@ -10,6 +10,10 @@ cache = {}
 NPM_REGISTRY_FMT = 'https://registry.npmjs.org/{pkg}/{version}'
 
 
+def _to_json_key(pkg, version):
+    return '{},{}'.format(pkg, version)
+
+
 def _clean_version(version):
     v = version.replace('~', '')
     if '>' in v:
@@ -71,7 +75,7 @@ def _fetch_deps(pkg, version, result):
         # recursion step
         version_ = _clean_version(version_)
         sub_subdeps = {}
-        result[str((pkg_, version_))] = sub_subdeps
+        result[_to_json_key(pkg_, version_)] = sub_subdeps
         _fetch_deps(pkg_, version_, sub_subdeps)
 
 
@@ -80,7 +84,7 @@ def main(request):
     version = _clean_version(request.match_info.get('version'))
 
     sub_deps = {}
-    result = {str((pkg, version)): sub_deps}
+    result = {_to_json_key(pkg, version): sub_deps}
     _fetch_deps(pkg, version, sub_deps)
     return web.json_response(result)
 
