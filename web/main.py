@@ -1,10 +1,5 @@
 
-import requests
-import concurrent.futures
-import json
-
 from aiohttp import web
-app = web.Application()
 
 from dep_view import fetch_deps
 
@@ -16,6 +11,7 @@ def on_get(request):
 
 
 if __name__ == '__main__':
+    app = web.Application()
     app.add_routes(
         [web.get('/{pkg}/{version}', on_get),
          web.get('/ping', lambda _: web.json_response('pong'))]
