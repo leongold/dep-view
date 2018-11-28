@@ -75,11 +75,10 @@ def _fetch_deps(pkg, version, result):
         deps = _fetch_live_deps((pkg, version))
         db.set(json.dumps((pkg, version)), deps)
 
-    all_deps = {tuple(dep) for dep in deps}
-    cached_deps = {tuple(dep) for dep in deps if db.exists(json.dumps(dep))}
-    _store_missing_live_deps(all_deps.difference(cached_deps))
-
-    for (pkg_, version_) in all_deps:
+    _store_missing_live_deps(
+        [dep for dep in deps if (not db.exists(json.dumps(dep)))]
+    )
+    for (pkg_, version_) in deps:
         # recursion step
         version_ = _clean_version(version_)
         sub_subdeps = {}
