@@ -1,6 +1,8 @@
 
+import os
+
 from pymongo import MongoClient
-client = MongoClient()
+client = MongoClient('db')
 
 
 DEPENDENCIES = 'dependencies'

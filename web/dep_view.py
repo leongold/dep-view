@@ -29,9 +29,9 @@ def _fetch_live_metadata(pkg, version):
     return response.json()
 
 
-def _fetch_live_deps(pkg, version):
+def _fetch_live_deps(key):
     """[(pkg, version), (pkg, version), ...]"""
-    metadata = _fetch_live_metadata(pkg, version)
+    metadata = _fetch_live_metadata(*key)
     dependencies = metadata.get('dependencies', {})
     return [(p, _clean_version(v)) for p, v in dependencies.items()]
 
@@ -58,11 +58,11 @@ def _fetch_deps(pkg, version, result):
     if stored_deps is not None:
         deps = stored_deps
     else:
-        deps = _fetch_live_deps(pkg, version)
+        deps = _fetch_live_deps((pkg, version))
         mongo.insert(pkg, version, deps)
 
     _store_missing_live_deps(
-        [dep for dep in deps if mongo.exists(*dep)]
+        [dep for dep in deps if (not mongo.exists(*dep))]
     )
     for (pkg_, version_) in deps:
         # recursion step
