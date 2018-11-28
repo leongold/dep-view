@@ -50,6 +50,14 @@ def _fetch_live_deps(key):
     return [(p, _clean_version(v)) for p, v in dependencies.items()]
 
 
+def _store_missing_live_deps(missing_deps):
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        for (pkg_, version_), subdeps in zip(
+            missing_deps, executor.map(_fetch_live_deps, missing_deps)
+        ):
+            db.set(json.dumps((pkg_, version_)), subdeps)
+
+
 def _fetch_deps(pkg, version, result):
     """Recursively fetch and iterate over the dependencies of a
     given package (of a given version).
@@ -67,28 +75,16 @@ def _fetch_deps(pkg, version, result):
         deps = _fetch_live_deps((pkg, version))
         db.set(json.dumps((pkg, version)), deps)
 
-    all_deps = {(p, v) for p, v in deps}
+    all_deps = {tuple(dep) for dep in deps}
+    cached_deps = {tuple(dep) for dep in deps if db.exists(json.dumps(dep))}
+    _store_missing_live_deps(all_deps.difference(cached_deps))
 
-    cached_deps = {(p, v) for p, v in deps if db.exists(json.dumps((p, v)))}
-    cached_deps_subdeps = {(p, v): db.get((p, v)) for p, v in cached_deps}
-
-    missing_deps = all_deps.difference(cached_deps)
-    missing_deps_subdeps = {}
-    with concurrent.futures.ProcessPoolExecutor() as executor:
-        for (pkg_, version_), subdeps in zip(
-                missing_deps, executor.map(_fetch_live_deps, missing_deps)
-            ):
-            missing_deps_subdeps[
-                (pkg_, _clean_version(version_))
-            ] = subdeps
-
-    all_deps_subdeps = {**missing_deps_subdeps, **cached_deps_subdeps}
-    for (pkg_, version_), subdeps in all_deps_subdeps.items():
+    for (pkg_, version_) in all_deps:
         # recursion step
         version_ = _clean_version(version_)
-        sub_sub_deps = {}
-        result[(pkg_, version_)] = sub_sub_deps
-        _fetch_deps(pkg_, version_, sub_sub_deps)
+        sub_subdeps = {}
+        result[(pkg_, version_)] = sub_subdeps
+        _fetch_deps(pkg_, version_, sub_subdeps)
 
 
 def main(request):
