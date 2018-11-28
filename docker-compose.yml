@@ -1,0 +1,15 @@
+version: '3'
+services:
+  web:
+    build: ./web
+    ports:
+      - "8080:8080"
+  db:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    volumes:
+      - db_volume:/var/lib/mongodb
+volumes:
+  db_volume:
+    external: true

@@ -3,13 +3,10 @@ import requests
 import concurrent.futures
 import json
 
+import mongo
 
-cache = {}
+
 NPM_REGISTRY_FMT = 'https://registry.npmjs.org/{pkg}/{version}'
-
-
-def _to_json_key(pkg, version):
-    return '{},{}'.format(pkg, version)
 
 
 def _clean_version(version):
@@ -32,19 +29,19 @@ def _fetch_live_metadata(pkg, version):
     return response.json()
 
 
-def _fetch_live_deps(key):
+def _fetch_live_deps(pkg, version):
     """[(pkg, version), (pkg, version), ...]"""
-    metadata = _fetch_live_metadata(*key)
+    metadata = _fetch_live_metadata(pkg, version)
     dependencies = metadata.get('dependencies', {})
     return [(p, _clean_version(v)) for p, v in dependencies.items()]
 
 
 def _store_missing_live_deps(missing_deps):
     with concurrent.futures.ProcessPoolExecutor() as executor:
-        for key, subdeps in zip(
+        for (pkg, version), subdeps in zip(
             missing_deps, executor.map(_fetch_live_deps, missing_deps)
         ):
-            cache[key] = subdeps
+            mongo.insert(pkg, version, subdeps)
 
 
 def _fetch_deps(pkg, version, result):
@@ -57,27 +54,26 @@ def _fetch_deps(pkg, version, result):
     2) when dependencies are not stored locally, HTTP requests are executed
        in parallel.
     """
-    key = (pkg, version)
-    stored_deps = cache.get(key)
+    stored_deps = mongo.get(pkg, version)
     if stored_deps is not None:
         deps = stored_deps
     else:
-        deps = _fetch_live_deps(key)
-        cache[key] = deps
+        deps = _fetch_live_deps(pkg, version)
+        mongo.insert(pkg, version, deps)
 
     _store_missing_live_deps(
-        [dep for dep in deps if dep in cache]
+        [dep for dep in deps if mongo.exists(*dep)]
     )
     for (pkg_, version_) in deps:
         # recursion step
         version_ = _clean_version(version_)
         sub_subdeps = {}
-        result[_to_json_key(pkg_, version_)] = sub_subdeps
+        result[mongo.to_json_key(pkg_, version_)] = sub_subdeps
         _fetch_deps(pkg_, version_, sub_subdeps)
 
 
 def fetch_deps(pkg, version):
     sub_deps = {}
-    result = {_to_json_key(pkg, version): sub_deps}
+    result = {mongo.to_json_key(pkg, version): sub_deps}
     _fetch_deps(pkg, version, sub_deps)
     return result
