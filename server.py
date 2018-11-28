@@ -4,12 +4,9 @@ import json
 
 from aiohttp import web
 app = web.Application()
-import pickledb
-db = pickledb.load('db', True)
-import pprint
 import requests
 
-
+cache = {}
 NPM_REGISTRY_FMT = 'https://registry.npmjs.org/{pkg}/{version}'
 
 
@@ -18,17 +15,8 @@ def _clean_version(version):
     if '>' in v:
         v = v[v.find(' '):]
     if '<' in v:
-        v = v[:v.find( '')]
+        v = v[:v.find('')]
     return v
-
-
-def _fetch_stored_deps(pkg, version):
-    """[(pkg, version), (pkg, version), ...]"""
-    key = json.dumps((pkg, version))
-    if db.exists(key):
-        # db.get has no fallback value
-        return db.get(key)
-    return None
 
 
 def _fetch_live_metadata(pkg, version):
@@ -52,10 +40,10 @@ def _fetch_live_deps(key):
 
 def _store_missing_live_deps(missing_deps):
     with concurrent.futures.ProcessPoolExecutor() as executor:
-        for (pkg_, version_), subdeps in zip(
+        for key, subdeps in zip(
             missing_deps, executor.map(_fetch_live_deps, missing_deps)
         ):
-            db.set(json.dumps((pkg_, version_)), subdeps)
+            cache[key] = subdeps
 
 
 def _fetch_deps(pkg, version, result):
@@ -68,21 +56,22 @@ def _fetch_deps(pkg, version, result):
     2) when dependencies are not stored locally, HTTP requests are executed
        in parallel.
     """
-    stored_deps = _fetch_stored_deps(pkg, version)
+    key = (pkg, version)
+    stored_deps = cache.get(key)
     if stored_deps is not None:
         deps = stored_deps
     else:
-        deps = _fetch_live_deps((pkg, version))
-        db.set(json.dumps((pkg, version)), deps)
+        deps = _fetch_live_deps(key)
+        cache[key] = deps
 
     _store_missing_live_deps(
-        [dep for dep in deps if (not db.exists(json.dumps(dep)))]
+        [dep for dep in deps if dep in cache]
     )
     for (pkg_, version_) in deps:
         # recursion step
         version_ = _clean_version(version_)
         sub_subdeps = {}
-        result[(pkg_, version_)] = sub_subdeps
+        result[str((pkg_, version_))] = sub_subdeps
         _fetch_deps(pkg_, version_, sub_subdeps)
 
 
@@ -91,9 +80,9 @@ def main(request):
     version = _clean_version(request.match_info.get('version'))
 
     sub_deps = {}
-    result = {(pkg, version): sub_deps}
+    result = {str((pkg, version)): sub_deps}
     _fetch_deps(pkg, version, sub_deps)
-    return web.Response(text=pprint.pformat(result))
+    return web.json_response(result)
 
 
 if __name__ == '__main__':
