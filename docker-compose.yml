@@ -1,13 +1,21 @@
 version: '3'
 services:
-  web:
+  api:
     build: .
-    ports:
-      - "8080:8080"
+    depends_on:
+      - db
   db:
     image: mongo:latest
     volumes:
       - db_volume:/var/lib/mongodb
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - ./conf.d:/etc/nginx/conf.d
+    depends_on:
+      - api
 volumes:
   db_volume:
     external: true
