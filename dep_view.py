@@ -1,7 +1,10 @@
 
-import requests
 import concurrent.futures
 import json
+
+import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 
 from dal import to_json_key
 from dal import from_json_key
@@ -21,7 +24,13 @@ def _clean_version(version):
 
 
 def _fetch_live_metadata(pkg, version):
-    response = requests.get(
+    session = requests.Session()
+    retry = Retry(connect=3, backoff_factor=0.5)
+    adapter = HTTPAdapter(max_retries=retry)
+
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+    response = session.get(
         NPM_REGISTRY_FMT.format(pkg=pkg, version=version)
     )
     try:
