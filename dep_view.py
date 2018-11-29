@@ -3,7 +3,9 @@ import requests
 import concurrent.futures
 import json
 
-import mongo
+from dal import to_json_key
+from dal import from_json_key
+from dal.mongo_client import mongo
 
 
 NPM_REGISTRY_FMT = 'https://registry.npmjs.org/{pkg}/{version}'
@@ -68,12 +70,12 @@ def _fetch_deps(pkg, version, result):
         # recursion step
         version_ = _clean_version(version_)
         sub_subdeps = {}
-        result[mongo.to_json_key(pkg_, version_)] = sub_subdeps
+        result[to_json_key(pkg_, version_)] = sub_subdeps
         _fetch_deps(pkg_, version_, sub_subdeps)
 
 
 def fetch_deps(pkg, version):
     sub_deps = {}
-    result = {mongo.to_json_key(pkg, version): sub_deps}
+    result = {to_json_key(pkg, version): sub_deps}
     _fetch_deps(pkg, version, sub_deps)
     return result
