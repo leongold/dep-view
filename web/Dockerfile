@@ -4,3 +4,4 @@ WORKDIR /workdir
 RUN pip install -r requirements.txt
 EXPOSE 8081
 CMD ["python", "api.py"]
+
