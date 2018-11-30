@@ -5,8 +5,8 @@
 ```run.sh``` builds and deploys a docker compose, consisting of the following services:
 
 - MongoDB service (using a persistent volume).
-- python/aiohttp based backend/api service (3 replicas).
-- nodejs/express based frontend service (3 replicas).
+- python/aiohttp based backend/api service (N replicas).
+- nodejs/express based frontend service (N replicas).
 - nginx service.
 
 *usage*:
@@ -20,13 +20,13 @@
   - database query when in-memory cache is a miss.
   - parallel http requests via multiprocessing when database query is a miss.
 - [aiohttp.](http://y.tsutsumi.io/aiohttp-vs-multithreaded-flask-for-high-io-applications.html)
-- TODO: database horizontal scaling/sharding!
 
 *testing*:
 
-```run_tests.sh``` executes pytest based functional tests. 
+- ```run_tests.sh``` executes pytest based functional tests. 
 
 *roadmap*:
+- database scaling/sharding.
 - CI.
 
 ![header image](https://github.com/leongold/dep-view/blob/master/dep-view-demo.png)
