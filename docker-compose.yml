@@ -1,9 +1,13 @@
 version: '3'
 services:
   api:
-    build: ./web
+    build: ./web/api
     depends_on:
       - db
+  frontend:
+    build: ./web/frontend
+    depends_on:
+      - api
   db:
     image: mongo:latest
     volumes:
@@ -15,7 +19,7 @@ services:
     volumes:
       - ./conf.d:/etc/nginx/conf.d
     depends_on:
-      - api
+      - frontend
 volumes:
   db_volume:
     external: true
