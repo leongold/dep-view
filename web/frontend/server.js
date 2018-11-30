@@ -60,4 +60,9 @@ app.get('/:pkg/:version', (req, res) => {
         })
     });
 });
+
+app.get('/ping', (req, res) => {
+    res.send('pong')
+});
+
 app.listen(PORT, HOST);
