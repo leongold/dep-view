@@ -3,15 +3,21 @@ services:
   api-0:
     build: ./api
     depends_on:
-      - db
+      - db-a-i
+      - db-j-q
+      - db-r-z
   api-1:
     build: ./api
     depends_on:
-      - db
+      - db-a-i
+      - db-j-q
+      - db-r-z
   api-2:
     build: ./api
     depends_on:
-      - db
+      - db-a-i
+      - db-j-q
+      - db-r-z
   frontend-0:
     build: ./frontend
     depends_on:
@@ -24,10 +30,18 @@ services:
     build: ./frontend
     depends_on:
       - api-2
-  db:
+  db-a-i:
     image: mongo:latest
     volumes:
-      - db_volume:/var/lib/mongodb
+      - db_volume_a_i:/var/lib/mongodb
+  db-j-q:
+    image: mongo:latest
+    volumes:
+      - db_volume_j_q:/var/lib/mongodb
+  db-r-z:
+    image: mongo:latest
+    volumes:
+      - db_volume_r_z:/var/lib/mongodb
   nginx:
     build: ./nginx
     depends_on:
@@ -37,5 +51,9 @@ services:
     ports:
       - "8080:80"
 volumes:
-  db_volume:
+  db_volume_a_i:
+    external: true
+  db_volume_j_q:
+    external: true
+  db_volume_r_z:
     external: true

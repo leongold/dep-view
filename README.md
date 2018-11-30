@@ -23,6 +23,7 @@
 - TODO: database horizontal scaling/sharding!
 
 *testing*:
+
 ```run_tests.sh``` executes pytest based functional tests. 
 
 *roadmap*:
