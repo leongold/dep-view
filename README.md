@@ -24,7 +24,7 @@
 
 *testing*:
 
-```run_tests.sh``` executes pytest based functional tests. 
+- ```run_tests.sh``` executes pytest based functional tests. 
 
 *roadmap*:
 - CI.
