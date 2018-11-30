@@ -5,8 +5,8 @@
 ```run.sh``` builds and deploys a docker compose, consisting of the following services:
 
 - MongoDB service (using a persistent volume).
-- python/aiohttp based backend/api service (3 replicas).
-- nodejs/express based frontend service (3 replicas).
+- python/aiohttp based backend/api service (N replicas).
+- nodejs/express based frontend service (N replicas).
 - nginx service.
 
 *usage*:
