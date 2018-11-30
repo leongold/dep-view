@@ -43,7 +43,7 @@ app.get('/:pkg/:version', (req, res) => {
     const pkg = req.params.pkg;
     const version = req.params.version;
     const options = {
-        host: 'api',
+        host: 'api-' + Math.floor(Math.random() * Math.floor(3)).toString(),
         port: PORT,
         path: '/api/' + pkg + '/' + version,
         method: 'GET',

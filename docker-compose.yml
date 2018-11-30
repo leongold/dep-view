@@ -1,25 +1,41 @@
 version: '3'
 services:
-  api:
+  api-0:
     build: ./api
     depends_on:
       - db
-  frontend:
+  api-1:
+    build: ./api
+    depends_on:
+      - db
+  api-2:
+    build: ./api
+    depends_on:
+      - db
+  frontend-0:
     build: ./frontend
     depends_on:
-      - api
+      - api-0
+  frontend-1:
+    build: ./frontend
+    depends_on:
+      - api-1
+  frontend-2:
+    build: ./frontend
+    depends_on:
+      - api-2
   db:
     image: mongo:latest
     volumes:
       - db_volume:/var/lib/mongodb
   nginx:
-    image: nginx:latest
+    build: ./nginx
+    depends_on:
+      - frontend-0
+      - frontend-1
+      - frontend-2
     ports:
       - "8080:80"
-    volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d
-    depends_on:
-      - frontend
 volumes:
   db_volume:
     external: true
