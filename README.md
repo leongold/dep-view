@@ -20,6 +20,7 @@
   - database query when in-memory cache is a miss.
   - parallel http requests via multiprocessing.
 - [aiohttp.](http://y.tsutsumi.io/aiohttp-vs-multithreaded-flask-for-high-io-applications.html)
+- TODO: database horizontal scaling/sharding!
 
 *testing*:
 ```run_tests.sh``` executes pytest based functional tests. 
