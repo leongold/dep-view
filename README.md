@@ -2,11 +2,11 @@
 
 *deployment*:
 
-```run.sh``` builds and deploys a docker compose, consisting of the following services:
+```up.sh``` builds and deploys a docker compose, consisting of the following services:
 
 - MongoDB service (3 replicas for alphabetical sharding; persistent volumes).
-- python/aiohttp based backend/api service (N replicas).
-- nodejs/express based frontend service (N replicas).
+- python/aiohttp based backend/api service (3 replicas).
+- nodejs/express based frontend service (3 replicas).
 - nginx service.
 
 *usage*:
@@ -24,7 +24,7 @@
 
 *testing*:
 
-- ```run_tests.sh``` executes pytest based functional tests. 
+- ```run_tests.sh``` executes pytest based functional tests.
 
 *roadmap*:
 - CI.

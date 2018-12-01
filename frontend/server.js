@@ -43,8 +43,7 @@ app.get('/:pkg/:version', (req, res) => {
     const pkg = req.params.pkg;
     const version = req.params.version;
     const options = {
-        host: 'api-' + Math.floor(Math.random() * Math.floor(3)).toString(),
-        port: PORT,
+        host: 'nginx',
         path: '/api/' + pkg + '/' + version,
         method: 'GET',
         json: true
@@ -61,7 +60,7 @@ app.get('/:pkg/:version', (req, res) => {
     });
 });
 
-app.get('/ping', (req, res) => {
+app.get('/ping', (_, res) => {
     res.send('pong')
 });
 

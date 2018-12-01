@@ -21,13 +21,13 @@ def env():
                 time.sleep(0.5)
             except requests.exceptions.ConnectionError:
                 if time.time() - start >= TIMEOUT:
-                    raise ValueError('failed to run api server')
+                    raise ValueError('failed to create env')
                 continue
             return
 
     root = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
-    subprocess.Popen([os.path.join(root, 'run.sh')])
+    subprocess.Popen([os.path.join(root, 'up.sh')])
     wait_for_env()
     yield
-    p = subprocess.Popen(['docker-compose', 'down'], cwd=root)
+    p = subprocess.Popen([os.path.join(root, 'down.sh')])
     p.wait()
