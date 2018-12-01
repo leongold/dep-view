@@ -88,3 +88,18 @@ def fetch_deps(pkg, version):
     result = {to_json_key(pkg, version): sub_deps}
     _fetch_deps(pkg, version, sub_deps)
     return result
+
+
+def translate_latest_version(pkg):
+    metadata = _fetch_live_metadata(pkg, 'latest')
+    version = _clean_version(metadata['version'])
+    if (not mongo.exists(pkg, version)):
+        deps = [
+            (p, _clean_version(v))
+            for p, v in
+            metadata.get('dependencies', {}).items()
+        ]
+        _store_missing_live_deps(
+            [dep for dep in deps if (not mongo.exists(*dep))]
+        )
+    return version

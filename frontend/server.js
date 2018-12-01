@@ -3,10 +3,40 @@
 const http = require('http');
 const express = require('express');
 const PORT = 8080;
+const CACHE_SIZE = 1000;
 const HOST = '0.0.0.0';
 const app = express();
 const path = __dirname + '/views'
 app.set('view engine', 'ejs');
+
+class Cache {
+
+    constructor(max_size=CACHE_SIZE) {
+        this.max_size = max_size;
+        this.data = {};
+    }
+
+    exists(key) {
+        return (key in this.data);
+    }
+
+    get(key) {
+        if (!this.exists(key)) {
+            return null;
+        }
+        return this.data[key];
+    }
+
+    insert(key, value) {
+        var keys = Object.keys(this.data)
+        if (keys.length >= this.max_size) {
+            key = keys[0]
+            delete this.data[key];
+        }
+        this.data[key] = value;
+    }
+}
+const cache = new Cache();
 
 function generate_tree_data(branch_in_data, branch_in_result, parent) {
     for (var key in branch_in_data) {
@@ -23,8 +53,14 @@ function generate_tree_data(branch_in_data, branch_in_result, parent) {
 
 function on_end(body, res) {
     var data = JSON.parse(body);
+    console.log(data);
     var treeData = [];
     var root_key = Object.keys(data)[0];
+    if (cache.exists(root_key)) {
+        console.log('returning cached result for ' + root_key)
+        res.render(path + '/index.ejs', { "treeData": cache.get(root_key)});
+        return;
+    }
     var root_deps = data[root_key];
     var root_node = { "name": root_key, "parent": null };
 
@@ -36,6 +72,7 @@ function on_end(body, res) {
     var root_children = [];
     root_node["children"] = root_children;
     generate_tree_data(data[root_key], treeData[0]["children"], root_key);
+    cache.insert(root_key, treeData);
     res.render(path + '/index.ejs', { "treeData": treeData });
 }
 

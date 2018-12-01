@@ -13,11 +13,13 @@
 - ```/<package>/<version>``` displays a tree view of the dependencies.
 - ```/api/<package>/<version>``` returns a json representation of the dependencies.
 
-*general performance tuning notes*:
+*performance*:
 - nginx for horizontal scaling.
 - alphabetical database sharding (a-i; j-q; r-z).
+- frontend server in-memory cache of the last N requests.
 - backend data retrieval:
-  - in-memomry cache of the last N requests.
+  - executed when frontend serrver in-memory cache is a miss.
+  - in-memory cache of the last N requests.
   - database query when in-memory cache is a miss.
   - parallel http requests via multiprocessing when database query is a miss.
   - [aiohttp.](http://y.tsutsumi.io/aiohttp-vs-multithreaded-flask-for-high-io-applications.html)
