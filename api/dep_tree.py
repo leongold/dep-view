@@ -19,7 +19,7 @@ class DepTree(object):
     def __init__(self, pkg, version):
         self._pkg = pkg
         self._version = self._get_version(version)
-        self._json_key = to_json_key(pkg, version)
+        self._json_key = to_json_key(pkg, self._version)
         self._branches = {}
 
     @property
@@ -31,10 +31,10 @@ class DepTree(object):
         return self._json_key
 
     def _get_version(self, version):
-        if version != 'latest':
-            return version
-        metadata = self._fetch_live_metadata(version)
-        return self._clean_version(metadata['version'])
+        if version == 'latest':
+            metadata = self._fetch_live_metadata(version)
+            return self._clean_version(metadata['version'])
+        return version
 
     async def populate(self):
         cached_deps = mongo.get(self._json_key)

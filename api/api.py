@@ -10,8 +10,8 @@ from dep_tree import DepTree
 async def on_get(request):
     pkg = request.match_info.get('pkg')
     version = request.match_info.get('version')
-    dt = DepTree(pkg, version)
 
+    dt = DepTree(pkg, version)
     cached_result = cache.get(pkg, dt.version)
     if cached_result is not None:
         return web.json_response(cached_result)
