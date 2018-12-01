@@ -17,10 +17,9 @@
 - nginx for horizontal scaling.
 - alphabetical database sharding (a-i; j-q; r-z).
 - frontend server in-memory cache of the last N requests.
-- backend data retrieval:
-  - executed when frontend serrver in-memory cache is a miss.
-  - in-memory cache of the last N requests.
-  - database query when in-memory cache is a miss.
+- frontend->backend data retrieval:
+  - executed when frontend server in-memory cache is a miss.
+  - database query when backend in-memory cache is a miss.
   - parallel http requests via multiprocessing when database query is a miss.
   - [aiohttp.](http://y.tsutsumi.io/aiohttp-vs-multithreaded-flask-for-high-io-applications.html)
 
