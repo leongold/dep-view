@@ -30,12 +30,6 @@ class DepTree(object):
     def json_key(self):
         return self._json_key
 
-    def _get_version(self, version):
-        if version == 'latest':
-            metadata = self._fetch_live_metadata(version)
-            return self._clean_version(metadata['version'])
-        return version
-
     async def populate(self):
         cached_deps = mongo.get(self._json_key)
         if cached_deps is not None:
@@ -57,6 +51,12 @@ class DepTree(object):
         except pymongo.errors.DuplicateKeyError:
             pass
         return self._branches
+
+    def _get_version(self, version):
+        if version == 'latest':
+            metadata = self._fetch_live_metadata(version)
+            return self._clean_version(metadata['version'])
+        return version
 
     def _get_direct_nodes(self):
         """[(pkg, version), (pkg, version), ...]"""
