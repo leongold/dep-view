@@ -27,7 +27,6 @@
 - ```run_tests.sh``` executes pytest based functional tests. 
 
 *roadmap*:
-- database scaling/sharding.
 - CI.
 
 ![header image](https://github.com/leongold/dep-view/blob/master/dep-view-demo.png)
