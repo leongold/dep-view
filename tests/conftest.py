@@ -7,7 +7,7 @@ import pytest
 import requests
 
 
-TIMEOUT = 30
+TIMEOUT = 60
 
 
 @pytest.fixture
