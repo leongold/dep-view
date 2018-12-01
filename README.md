@@ -1,5 +1,11 @@
 ### npm dependencies web service.
 
+*how usable is this?*
+
+This is a demonstration, and as such...
+- error handling is very lackluster.
+- practically not configurable; a lot is hardcoded.
+
 *deployment*:
 
 ```up.sh``` builds and deploys a docker compose, consisting of the following services:
@@ -26,12 +32,5 @@
 *testing*:
 
 - ```run_tests.sh``` executes pytest based functional tests.
-
-*how usable is this?*
-
-This is a demonstration, and as such...
-- error handling is very lackluster.
-- practically not configurable; a lot is hardcoded.
-
 
 ![header image](https://github.com/leongold/dep-view/blob/master/dep-view-demo.png)
