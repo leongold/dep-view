@@ -66,6 +66,7 @@ function on_end(body, res) {
 
     treeData.push(root_node);
     if (Object.keys(root_deps).length === 0) {
+        cache.insert(root_key, treeData);
         res.render(path + '/index.ejs', { "treeData": treeData });
         return;
     }
