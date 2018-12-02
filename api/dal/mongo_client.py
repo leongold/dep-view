@@ -20,12 +20,11 @@ class MongoInterface(DbInterface):
 
     def get(self, key):
         try:
-            deps = self._collection(key).find_one(
+            return self._collection(key).find_one(
                 {'_id': key}
             )[DEPENDENCIES]
         except TypeError:
             return None
-        return deps
 
     def insert(self, key, deps):
         self._collection(key).insert_one({

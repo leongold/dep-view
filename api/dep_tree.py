@@ -20,12 +20,11 @@ class DepTree(object):
         self._pkg = pkg
         self._version = self._get_version(version)
         self._json_key = to_json_key(pkg, self._version)
-        self._branches = {}
-        self._tree = {self._json_key: self._branches}
+        self._tree = {self._json_key: {}}
 
     @property
     def branches(self):
-        return self._branches
+        return self._tree[self._json_key]
 
     @property
     def tree(self):
@@ -42,25 +41,21 @@ class DepTree(object):
     def populate(self):
         cached_deps = mongo.get(self._json_key)
         if cached_deps is not None:
-            return cached_deps
+            self._tree[self._json_key] = cached_deps
+            return
 
         def _populate(key):
             dt = DepTree(*key)
             dt.populate()
-            self._branches[dt.json_key] = dt.branches
-            try:
-                mongo.insert(dt.json_key, dt.branches)
-            except pymongo.errors.DuplicateKeyError:
-                pass
+            self.branches[dt.json_key] = dt.branches
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            executor.map(_populate, self._get_direct_nodes())
+            list(executor.map(_populate, self._get_direct_nodes()))
 
         try:
-            mongo.insert(self._json_key, self._branches)
+            mongo.insert(self._json_key, self.branches)
         except pymongo.errors.DuplicateKeyError:
             pass
-        return self._branches
 
     def _get_version(self, version):
         if version == 'latest':
@@ -79,7 +74,6 @@ class DepTree(object):
         retry = Retry(connect=3, backoff_factor=0.5)
         adapter = HTTPAdapter(max_retries=retry)
 
-        session.mount('http://', adapter)
         session.mount('https://', adapter)
         response = session.get(
             NPM_REGISTRY_FMT.format(pkg=self._pkg, version=version)
