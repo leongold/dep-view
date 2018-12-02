@@ -7,7 +7,7 @@ from dal.cache_client import cache
 from dep_tree import DepTree
 
 
-async def on_get(request):
+def on_get(request):
     pkg = request.match_info.get('pkg')
     version = request.match_info.get('version')
     dt = DepTree(pkg, version)
