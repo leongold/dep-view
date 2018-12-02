@@ -16,6 +16,8 @@ This is a demonstration, and as such...
 - nginx service.
 
 *usage*:
+
+nginx is configured to expose to port 8080.
 - ```/<package>/<version>``` displays a tree view of the dependencies.
 - ```/api/<package>/<version>``` returns a json representation of the dependencies.
 
