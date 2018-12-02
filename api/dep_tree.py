@@ -1,5 +1,5 @@
 
-import asyncio
+import concurrent
 import json
 
 import pymongo
@@ -44,15 +44,18 @@ class DepTree(object):
         if cached_deps is not None:
             return cached_deps
 
-        direct_nodes = self._get_direct_nodes()
-        for p, v in direct_nodes:
-            dt = DepTree(p, v)
+        def _populate(key):
+            dt = DepTree(*key)
             dt.populate()
             self._branches[dt.json_key] = dt.branches
             try:
                 mongo.insert(dt.json_key, dt.branches)
             except pymongo.errors.DuplicateKeyError:
                 pass
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            executor.map(_populate, self._get_direct_nodes())
+
         try:
             mongo.insert(self._json_key, self._branches)
         except pymongo.errors.DuplicateKeyError:
