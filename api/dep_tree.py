@@ -21,6 +21,15 @@ class DepTree(object):
         self._version = self._get_version(version)
         self._json_key = to_json_key(pkg, self._version)
         self._branches = {}
+        self._tree = {self._json_key: self._branches}
+
+    @property
+    def branches(self):
+        return self._branches
+
+    @property
+    def tree(self):
+        return self._tree
 
     @property
     def version(self):
@@ -30,7 +39,7 @@ class DepTree(object):
     def json_key(self):
         return self._json_key
 
-    async def populate(self):
+    def populate(self):
         cached_deps = mongo.get(self._json_key)
         if cached_deps is not None:
             return cached_deps
@@ -38,12 +47,10 @@ class DepTree(object):
         direct_nodes = self._get_direct_nodes()
         for p, v in direct_nodes:
             dt = DepTree(p, v)
-            v = dt.version
-            jk = to_json_key(p, v)
-            branch = await dt.populate()
-            self._branches[jk] = branch
+            dt.populate()
+            self._branches[dt.json_key] = dt.branches
             try:
-                mongo.insert(jk, branch)
+                mongo.insert(dt.json_key, dt.branches)
             except pymongo.errors.DuplicateKeyError:
                 pass
         try:

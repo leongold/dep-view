@@ -15,9 +15,9 @@ async def on_get(request):
     cached_result = cache.get(pkg, dt.version)
     if cached_result is not None:
         return web.json_response(cached_result)
-    result = {dt.json_key: await dt.populate()}
-    cache.insert(pkg, dt.version, result)
-    return web.json_response(result)
+    dt.populate()
+    cache.insert(pkg, dt.version, dt.tree)
+    return web.json_response(dt.tree)
 
 
 if __name__ == '__main__':
