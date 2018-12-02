@@ -11,17 +11,14 @@ class CacheClient(DbInterface):
         self._max_size = max_size
         self._data = {}
 
-    def get(self, pkg, version):
-        return self._data.get((pkg, version), None)
+    def get(self, json_key):
+        return self._data.get(json_key, None)
 
-    def exists(self, pkg, version):
-        return (pkg, version) in self._data
-
-    def insert(self, pkg, version, deps):
+    def insert(self, json_key, deps):
         if len(self._data) >= self._max_size:
             key = next(iter(self._data.keys()))
             del self._data[key]
-        self._data[(pkg, version)] = deps
+        self._data[json_key] = deps
 
 
 cache = CacheClient()

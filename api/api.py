@@ -10,13 +10,14 @@ from dep_tree import DepTree
 async def on_get(request):
     pkg = request.match_info.get('pkg')
     version = request.match_info.get('version')
-
     dt = DepTree(pkg, version)
-    cached_result = cache.get(pkg, dt.version)
+
+    cached_result = cache.get(dt.json_key)
     if cached_result is not None:
         return web.json_response(cached_result)
+
     dt.populate()
-    cache.insert(pkg, dt.version, dt.tree)
+    cache.insert(dt.json_key, dt.tree)
     return web.json_response(dt.tree)
 
 
