@@ -29,7 +29,7 @@ nginx is configured to expose to port 8080.
 - frontend->backend data retrieval:
   - executed when frontend server in-memory cache is a miss.
   - database query when backend in-memory cache is a miss.
-  - parallel http requests via multiprocessing when database query is a miss.
+  - multithreaded http requests when database query is a miss.
 
 *testing*:
 
