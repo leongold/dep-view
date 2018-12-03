@@ -1,16 +1,27 @@
 ### npm dependencies web service.
 
+*what is this?*
+
+This is a set of services that efficiently fetch, store, and serve
+queries for npm dependencies. Unlike with `registry.npmjs.org`, an entire
+dependency tree is returned.
+
+I'd like to showcase several methods for improving query latency and
+service scalability in a container environment.
+
 *how usable is this?*
 
-This is a demonstration, and as such...
+This is primarily a demonstration, and as such...
 - error handling is very lackluster.
 - practically not configurable; a lot is hardcoded.
+
+Barring the above, pretty usable!
 
 *deployment*:
 
 ```up.sh``` builds and deploys a docker compose, consisting of the following services:
 
-- MongoDB service (3 replicas for alphabetical sharding; persistent volumes).
+- MongoDB service (3 instances for alphabetical sharding; persistent volumes).
 - python/aiohttp based backend/api service (3 replicas).
 - nodejs/express based frontend service (3 replicas).
 - nginx service.
@@ -18,7 +29,7 @@ This is a demonstration, and as such...
 *usage*:
 
 nginx is configured to expose to port 8080.
-- ```/<package>/<version>``` displays a tree view of the dependencies.
+- ```/<package>/<version>``` displays a tree view of the dependencies (see example below).
 - ```/api/<package>/<version>``` returns a json representation of the dependencies.
 
 *performance*:
