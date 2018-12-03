@@ -15,7 +15,7 @@ This is primarily a demonstration, and as such...
 - error handling is very lackluster.
 - practically not configurable; a lot is hardcoded.
 
-Barring the above, pretty usable!
+Bearing the above, pretty usable!
 
 *deployment*:
 
