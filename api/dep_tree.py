@@ -94,7 +94,7 @@ class DepTree(object):
     @staticmethod
     def _clean_version(version):
         v = version.replace('~', '')
-        v = version.replace('^', '')
+        v = v.replace('^', '')
         if '>' in v:
             v = v[v.find(' '):]
         if '<' in v:
