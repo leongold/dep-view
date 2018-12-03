@@ -7,7 +7,7 @@ queries for npm dependencies. Unlike with `registry.npmjs.org`, an entire
 dependency tree is returned.
 
 I'd like to showcase several methods for improving query latency and
-service scalability in a container environment.
+service scalability in a containerized environment.
 
 *how usable is this?*
 
