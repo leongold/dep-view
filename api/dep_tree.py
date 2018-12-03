@@ -1,7 +1,5 @@
 
 import concurrent
-import json
-import logging
 
 import pymongo
 import requests
@@ -47,9 +45,9 @@ class DepTree(object):
             return
 
         def _populate(key):
-            dt = DepTree(*key)
-            dt.populate()
-            self.branches[dt.json_key] = dt.branches
+            tree = DepTree(*key)
+            tree.populate()
+            self.branches[tree.json_key] = tree.branches
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             list(executor.map(_populate, self._get_direct_nodes()))
@@ -92,9 +90,9 @@ class DepTree(object):
 
     @staticmethod
     def _clean_version(version):
-        v = version.replace('~', '').replace('^', '')
-        if '>' in v:
-            v = v[v.find(' '):]
-        if '<' in v:
-            v = v[:v.find('')]
-        return v
+        version = version.replace('~', '').replace('^', '')
+        if '>' in version:
+            version = version[version.find(' '):]
+        if '<' in version:
+            version = version[:version.find('')]
+        return version

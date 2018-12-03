@@ -1,10 +1,7 @@
 
-import os
-
 from pymongo import MongoClient
 
 from dal import DbInterface
-from dal import to_json_key
 
 
 DEPENDENCIES = 'dependencies'
@@ -41,5 +38,6 @@ class MongoInterface(DbInterface):
 
     def _collection(self, key):
         return self._get_client(key[0])[DEP_VIEW][DEPENDENCIES]
+
 
 mongo = MongoInterface()
