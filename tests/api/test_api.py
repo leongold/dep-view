@@ -7,10 +7,20 @@ import pytest
 import requests
 
 
+API_FMT = 'http://localhost:8080/api/{pkg}/{version}'
+
+
+def _get(pkg, version):
+    return requests.get(API_FMT.format(pkg=pkg, version=version))
+
+
 def test_accepts_1_3_5(env):
     EXPECTED = {
         "accepts@1,3,5":
             {"mime-types@2,1,18": {"mime-db@1,33,0": {}}, "negotiator@0,6,1": {}}
     }
-    response = requests.get('http://localhost:8080/api/accepts/1.3.5')
-    assert response.json() == EXPECTED
+    assert _get('accepts', '1.3.5').json() == EXPECTED
+
+
+def test_non_existent_pkg(env):
+    assert _get('this-does-not-exist', 'latest').status_code == 500
