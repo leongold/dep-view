@@ -7,11 +7,14 @@ from dep_tree import DepTree
 
 
 def on_get(request):
-    pkg = request.match_info.get('pkg')
-    version = request.match_info.get('version')
-    dt = DepTree(pkg, version)
-    dt.populate()
-    return web.json_response(dt.tree)
+    try:
+        pkg = request.match_info.get('pkg')
+        version = request.match_info.get('version')
+        dt = DepTree(pkg, version)
+        dt.populate()
+        return web.json_response(dt.tree)
+    except:
+        return web.HTTPInternalServerError()
 
 
 if __name__ == '__main__':

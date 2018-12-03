@@ -56,7 +56,10 @@ class DepTree(object):
             self.branches[dt.json_key] = dt.branches
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            list(executor.map(_populate, self._get_direct_nodes()))
+            try:
+                list(executor.map(_populate, self._get_direct_nodes()))
+            except:
+                return
 
         cache.insert(self._json_key, self.branches)
         try:
@@ -85,10 +88,7 @@ class DepTree(object):
         response = session.get(
             NPM_REGISTRY_FMT.format(pkg=self._pkg, version=version)
         )
-        try:
-            response.raise_for_status()
-        except requests.exceptions.HTTPError:
-            return {}
+        response.raise_for_status()
         return response.json()
 
     @staticmethod

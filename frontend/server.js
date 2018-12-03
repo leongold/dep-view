@@ -87,7 +87,11 @@ app.get('/:pkg/:version', (req, res) => {
         json: true
     };
     http.get(options, function (_res) {
-        console.log(res.statusCode);
+        console.log("status code: ", _res.statusCode);
+        if (_res.statusCode >= 400) {
+            res.send("error, status code: " + _res.statusCode);
+            return;
+        }
         var body = "";
         _res.on('data', function (chunk) {
             // You can process streamed parts here...
