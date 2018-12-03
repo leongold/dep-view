@@ -1,6 +1,7 @@
 
 import concurrent
 import json
+import logging
 
 import pymongo
 import requests
@@ -40,14 +41,9 @@ class DepTree(object):
         return self._json_key
 
     def populate(self):
-        mem_cached_deps = cache.get(self._json_key)
-        if mem_cached_deps:
-            self._tree[self._json_key] = mem_cached_deps
-            return
-
-        db_cached_deps = mongo.get(self._json_key)
-        if db_cached_deps is not None:
-            self._tree[self._json_key] = db_cached_deps
+        cached_branches = self._get_cached_branches()
+        if cached_branches is not None:
+            self._tree[self._json_key] = cached_branches
             return
 
         def _populate(key):
@@ -56,10 +52,7 @@ class DepTree(object):
             self.branches[dt.json_key] = dt.branches
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            try:
-                list(executor.map(_populate, self._get_direct_nodes()))
-            except:
-                return
+            list(executor.map(_populate, self._get_direct_nodes()))
 
         cache.insert(self._json_key, self.branches)
         try:
@@ -67,24 +60,30 @@ class DepTree(object):
         except pymongo.errors.DuplicateKeyError:
             pass
 
+    def _get_cached_branches(self):
+        mem_cached_deps = cache.get(self._json_key)
+        if mem_cached_deps:
+            return mem_cached_deps
+        return mongo.get(self._json_key)
+
     def _get_version(self, version):
         if version == 'latest':
             metadata = self._fetch_live_metadata(version)
             return self._clean_version(metadata['version'])
-        return version
+        return self._clean_version(version)
 
     def _get_direct_nodes(self):
         """[(pkg, version), (pkg, version), ...]"""
         metadata = self._fetch_live_metadata(self._version)
         dependencies = metadata.get('dependencies', {})
-        return [(p, self._clean_version(v)) for p, v in dependencies.items()]
+        return [(p, v) for p, v in dependencies.items()]
 
     def _fetch_live_metadata(self, version):
         session = requests.Session()
         retry = Retry(connect=3, backoff_factor=0.8)
         adapter = HTTPAdapter(max_retries=retry)
-
         session.mount('https://', adapter)
+
         response = session.get(
             NPM_REGISTRY_FMT.format(pkg=self._pkg, version=version)
         )
@@ -93,8 +92,7 @@ class DepTree(object):
 
     @staticmethod
     def _clean_version(version):
-        v = version.replace('~', '')
-        v = v.replace('^', '')
+        v = version.replace('~', '').replace('^', '')
         if '>' in v:
             v = v[v.find(' '):]
         if '<' in v:
