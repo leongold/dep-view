@@ -12,7 +12,7 @@ class CacheClient(DbInterface):
         self._data = {}
 
     def get(self, json_key):
-        return self._data.get(json_key, None)
+        return self._data.get(json_key)
 
     def insert(self, json_key, deps):
         if len(self._data) >= self._max_size:
