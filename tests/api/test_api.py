@@ -24,3 +24,7 @@ def test_accepts_1_3_5(env):
 
 def test_non_existent_pkg(env):
     assert _get('this-does-not-exist', 'latest').status_code == 500
+
+
+def test_non_existent_version(env):
+    assert _get('express', 'over-9000').status_code == 500
