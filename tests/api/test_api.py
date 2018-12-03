@@ -1,9 +1,4 @@
 
-import os
-import subprocess
-import time
-
-import pytest
 import requests
 
 
@@ -17,7 +12,13 @@ def _get(pkg, version):
 def test_accepts_1_3_5(env):
     EXPECTED = {
         "accepts@1,3,5":
-            {"mime-types@2,1,18": {"mime-db@1,33,0": {}}, "negotiator@0,6,1": {}}
+            {
+                "mime-types@2,1,18":
+                    {
+                        "mime-db@1,33,0": {}
+                    },
+                "negotiator@0,6,1": {}
+            }
     }
     assert _get('accepts', '1.3.5').json() == EXPECTED
 
