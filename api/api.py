@@ -1,4 +1,5 @@
 
+import functools
 import logging
 
 from aiohttp import web
@@ -6,16 +7,24 @@ from aiohttp import web
 from dep_tree import DepTree
 
 
+def handle_error(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            logging.error(str(e))
+            return web.HTTPInternalServerError()
+    return wrapper
+
+
+@handle_error
 def on_get(request):
-    try:
-        pkg = request.match_info.get('pkg')
-        version = request.match_info.get('version')
-        dt = DepTree(pkg, version)
-        dt.populate()
-        return web.json_response(dt.tree)
-    except Exception as e:
-        logging.error(str(e))
-        return web.HTTPInternalServerError()
+    pkg = request.match_info.get('pkg')
+    version = request.match_info.get('version')
+    dt = DepTree(pkg, version)
+    dt.populate()
+    return web.json_response(dt.tree)
 
 
 if __name__ == '__main__':
