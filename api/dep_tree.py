@@ -39,9 +39,9 @@ class DepTree(object):
         return self._json_key
 
     def populate(self):
-        cached_branches = self._get_cached_branches()
-        if cached_branches is not None:
-            self._tree[self._json_key] = cached_branches
+        stored_branches = self._get_stored_branches()
+        if stored_branches is not None:
+            self._tree[self._json_key] = stored_branches
             return
 
         def _populate(key):
@@ -52,16 +52,19 @@ class DepTree(object):
         with concurrent.futures.ThreadPoolExecutor() as executor:
             list(executor.map(_populate, self._get_direct_nodes()))
 
+        self._store_branches()
+
+    def _store_branches(self):
         cache.insert(self._json_key, self.branches)
         try:
             mongo.insert(self._json_key, self.branches)
         except pymongo.errors.DuplicateKeyError:
             pass
 
-    def _get_cached_branches(self):
-        mem_cached_deps = cache.get(self._json_key)
-        if mem_cached_deps:
-            return mem_cached_deps
+    def _get_stored_branches(self):
+        mem_stored_deps = cache.get(self._json_key)
+        if mem_stored_deps:
+            return mem_stored_deps
         return mongo.get(self._json_key)
 
     def _get_version(self, version):
